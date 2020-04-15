@@ -16,7 +16,6 @@ admin.initializeApp({
 	databaseURL: 'https://sd1-backend.firebaseio.com'
 });
 
-//
 exports.saveFileName = functions.storage.object().onFinalize(async object => {
 	let divider = object.name.lastIndexOf('/');
 
@@ -38,58 +37,27 @@ exports.saveFileName = functions.storage.object().onFinalize(async object => {
 				},
 				{ merge: true }
 			);
-	} else if (ext === '.mtl') {
-		return admin
-			.firestore()
-			.collection('metadata')
-			.doc(uuid)
-			.set(
-				{
-					MTLname: filename,
-					timestamp: uploadDate,
-					simComplete: false
-				},
-				{ merge: true }
-			);
 	} else if (ext === '.png') {
-		if (filename.includes('_top')) {
+		if (filename.includes('_out')) {
 			return admin
 				.firestore()
 				.collection('metadata')
 				.doc(uuid)
 				.set(
 					{
-						PNGnames: {
-							top: filename
-						},
+						outputName: filename,
 						simComplete: true
 					},
 					{ merge: true }
 				);
-		} else if (filename.includes('_bottom')) {
+		} else {
 			return admin
 				.firestore()
 				.collection('metadata')
 				.doc(uuid)
 				.set(
 					{
-						PNGnames: {
-							bottom: filename
-						},
-						simComplete: true
-					},
-					{ merge: true }
-				);
-		} else if (filename.includes('_hand')) {
-			return admin
-				.firestore()
-				.collection('metadata')
-				.doc(uuid)
-				.set(
-					{
-						PNGnames: {
-							hand: filename
-						},
+						textureName: filename,
 						simComplete: true
 					},
 					{ merge: true }
