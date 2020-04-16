@@ -18,11 +18,10 @@ admin.initializeApp({
 
 exports.saveFileName = functions.storage.object().onFinalize(async object => {
 	let divider = object.name.lastIndexOf('/');
-
 	let filename = object.name.substring(divider + 1);
-	let ext = object.name.substring(object.name.lastIndexOf('.'));
-	let uploadDate = new Date(Date.now());
+	let ext = filename.substring(filename.lastIndexOf('.'));
 	let uuid = object.name.substring(0, divider);
+	let uploadDate = new Date(Date.now());
 
 	if (ext === '.obj') {
 		return admin
@@ -63,5 +62,50 @@ exports.saveFileName = functions.storage.object().onFinalize(async object => {
 					{ merge: true }
 				);
 		}
+	}
+});
+
+exports.deleteFileName = functions.storage.object().onDelete(async object => {
+	let FieldValue = admin.firestore.FieldValue;
+
+	let divider = object.name.lastIndexOf('/');
+	let filename = object.name.substring(object.name.lastIndexOf('/') + 1);
+	let ext = filename.substring(filename.lastIndexOf('.'));
+	let uuid = object.name.substring(0, divider);
+
+	if (ext === '.obj') {
+		return admin
+			.firestore()
+			.collection('metadata')
+			.doc(uuid)
+			.update({
+				OBJname: FieldValue.delete()
+			});
+	} else if (ext === '.png') {
+		if (filename.includes('_out')) {
+			return admin
+				.firestore()
+				.collection('metadata')
+				.doc(uuid)
+				.update({
+					outputName: FieldValue.delete()
+				});
+		} else {
+			return admin
+				.firestore()
+				.collection('metadata')
+				.doc(uuid)
+				.update({
+					textureName: FieldValue.delete()
+				});
+		}
+	} else if (ext === '.mtl') {
+		return admin
+			.firestore()
+			.collection('metadata')
+			.doc(uuid)
+			.update({
+				MTLname: FieldValue.delete()
+			});
 	}
 });
